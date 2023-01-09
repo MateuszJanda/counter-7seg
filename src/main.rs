@@ -8,6 +8,8 @@ use panic_halt as _;
 
 const NUM_OF_SEGMENTS: usize = 7;
 
+const SEG_VALUES: [[u8; NUM_OF_SEGMENTS]; 2] = [[1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 0]];
+
 #[arduino_hal::entry]
 fn main() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
@@ -26,14 +28,12 @@ fn main() -> ! {
     let add_button = pins.d9.into_pull_up_input();
     let sub_button = pins.d10.into_pull_up_input();
 
-    let seg_values = [[1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 0]];
-
     let mut counter = 0;
     let mut add_pressed = false;
     let mut sub_pressed = false;
 
     loop {
-        display_digit(counter, &mut segments, &seg_values);
+        display_digit(counter, &mut segments);
 
         if add_button.is_low() && !add_pressed {
             add_pressed = true;
@@ -57,17 +57,13 @@ fn main() -> ! {
     }
 }
 
-fn display_digit(
-    digit: i32,
-    segments: &mut [Pin<Output, Dynamic>; NUM_OF_SEGMENTS],
-    seg_values: &[[i32; NUM_OF_SEGMENTS]; 2],
-) {
+fn display_digit(digit: i32, segments: &mut [Pin<Output, Dynamic>; NUM_OF_SEGMENTS]) {
     if digit < 0 || digit > 9 {
         panic!("Out of range");
     }
 
     for i in 0..NUM_OF_SEGMENTS {
-        if seg_values[digit as usize][i] == 0 {
+        if SEG_VALUES[digit as usize][i] == 0 {
             segments[i].set_low();
         } else {
             segments[i].set_high();
