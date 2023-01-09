@@ -23,7 +23,7 @@ const DIGIT_SEGMENTS: [[u8; NUM_OF_SEGMENTS]; 10] = [
 
 fn display_digit(digit: i32, segments_pins: &mut [Pin<Output, Dynamic>; NUM_OF_SEGMENTS]) {
     if digit < 0 || digit > 9 {
-        panic!("Out of range");
+        return;
     }
 
     for i in 0..NUM_OF_SEGMENTS {
