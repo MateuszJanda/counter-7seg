@@ -8,14 +8,40 @@ use panic_halt as _;
 
 const NUM_OF_SEGMENTS: usize = 7;
 
-const SEG_VALUES: [[u8; NUM_OF_SEGMENTS]; 2] = [[1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 0]];
+const DIGIT_SEGMENTS: [[u8; NUM_OF_SEGMENTS]; 10] = [
+    [1, 1, 1, 1, 1, 1, 0], // = 0
+    [0, 1, 1, 0, 0, 0, 0], // = 1
+    [1, 1, 0, 1, 1, 0, 1], // = 2
+    [1, 1, 1, 1, 0, 0, 1], // = 3
+    [0, 1, 1, 0, 0, 1, 1], // = 4
+    [1, 0, 1, 1, 0, 1, 1], // = 5
+    [1, 0, 1, 1, 1, 1, 1], // = 6
+    [1, 1, 1, 0, 0, 0, 0], // = 7
+    [1, 1, 1, 1, 1, 1, 1], // = 8
+    [1, 1, 1, 1, 0, 1, 1], // = 9
+];
+
+fn display_digit(digit: i32, segments_pins: &mut [Pin<Output, Dynamic>; NUM_OF_SEGMENTS]) {
+    if digit < 0 || digit > 9 {
+        panic!("Out of range");
+    }
+
+    for i in 0..NUM_OF_SEGMENTS {
+        if DIGIT_SEGMENTS[digit as usize][i] != 0 {
+            segments_pins[i].set_low();
+        } else {
+            segments_pins[i].set_high();
+        }
+    }
+}
 
 #[arduino_hal::entry]
 fn main() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
     let pins = arduino_hal::pins!(dp);
 
-    let mut segments = [
+    // Consecutively segments: A, B, C, D, E, F, G
+    let mut segments_pins = [
         pins.d2.into_output().downgrade(),
         pins.d3.into_output().downgrade(),
         pins.d4.into_output().downgrade(),
@@ -33,7 +59,7 @@ fn main() -> ! {
     let mut sub_pressed = false;
 
     loop {
-        display_digit(counter, &mut segments);
+        display_digit(counter, &mut segments_pins);
 
         if add_button.is_low() && !add_pressed {
             add_pressed = true;
@@ -54,19 +80,5 @@ fn main() -> ! {
         }
 
         arduino_hal::delay_ms(100);
-    }
-}
-
-fn display_digit(digit: i32, segments: &mut [Pin<Output, Dynamic>; NUM_OF_SEGMENTS]) {
-    if digit < 0 || digit > 9 {
-        panic!("Out of range");
-    }
-
-    for i in 0..NUM_OF_SEGMENTS {
-        if SEG_VALUES[digit as usize][i] == 0 {
-            segments[i].set_low();
-        } else {
-            segments[i].set_high();
-        }
     }
 }
