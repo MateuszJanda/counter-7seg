@@ -2,6 +2,7 @@
 name = "counter-7seg"
 version = "0.1.0"
 authors = ["Mateusz Janda <mateusz.janda@gmail.com>"]
+repository = "https://github.com/MateuszJanda/counter-7seg"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 
